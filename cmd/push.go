@@ -103,21 +103,21 @@ func init() {
 
 func pushLocalizationFiles(apiToken string, projectId string, branch string, files []LocalizationFile, overwrite bool, reviewed bool, tagAdded []string, tagUpdated []string, tagRemoved []string) error {
 	filesMap := make(map[string]*os.File)
-	for _, v := range files {
+	for index, v := range files {
 		file, err := os.Open(filepath.Clean(v.File))
 		if err != nil {
 			return errors.New(fmt.Sprintf("Failed to open file '%s'\nError: %v\n", filepath.Clean(v.File), err))
 		}
 		defer file.Close()
-		filesMap[v.LocaleCode] = file
+		filesMap[fmt.Sprint(index)] = file
 	}
 
 	cfg := localizely.NewConfiguration()
 	apiClient := localizely.NewAPIClient(cfg)
 	ctx := context.WithValue(context.Background(), localizely.ContextAPIKeys, map[string]localizely.APIKey{"API auth": {Key: apiToken}})
 
-	for _, v := range files {
-		file := filesMap[v.LocaleCode]
+	for index, v := range files {
+		file := filesMap[fmt.Sprint(index)]
 
 		req := apiClient.UploadAPIApi.ImportLocalizationFile(ctx, projectId)
 		req = req.LangCode(v.LocaleCode)
